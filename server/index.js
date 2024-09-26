@@ -1,3 +1,5 @@
+// index.js
+// Required modules
 const express = require('express');
 const path = require('path');
 const fs = require('fs').promises;
@@ -44,7 +46,7 @@ app.get('/form', (req, res) => {
 // Form submission route
 app.post('/submit-form', async (req, res) => {
     try {
-        const { name, email, message } = req.body;
+        const { name, power } = req.body;
 
         // Read existing users from file
         let users = [];
@@ -58,11 +60,11 @@ app.post('/submit-form', async (req, res) => {
         }
 
         // Find or create user
-        let user = users.find(u => u.name === name && u.email === email);
+        let user = users.find(u => u.name === name && u.power === power);
         if (user) {
-            user.messages.push(message);
+            user.power.push(power);
         } else {
-            user = { name, email, messages: [message] };
+            user = { name, power: [power] };
             users.push(user);
         }
 
@@ -76,25 +78,25 @@ app.post('/submit-form', async (req, res) => {
 });
 
 // Update user route (currently just logs and sends a response)
-app.put('/update-user/:currentName/:currentEmail', async (req, res) => {
+app.put('/update-user/:currentName/:currentPower', async (req, res) => {
     try {
-        const { currentName, currentEmail } = req.params;
-        const { newName, newEmail } = req.body;
-        console.log('Current user:', { currentName, currentEmail });
-        console.log('New user data:', { newName, newEmail });
+        const { currentName, currentPower } = req.params;
+        const { newName, newPower} = req.body;
+        console.log('Current user:', { currentName, currentPower });
+        console.log('New user data:', { newName, newPower });
         const data = await fs.readFile(dataPath, 'utf8');
         if (data) {
             let users = JSON.parse(data);
-            const userIndex = users.findIndex(user => user.name === currentName && user.email === currentEmail);
+            const userIndex = users.findIndex(user => user.name === currentName && user.power === currentPower);
             console.log(userIndex);
             if (userIndex === -1) {
                 return res.status(404).json({ message: "User not found" })
             }
-            users[userIndex] = { ...users[userIndex], name: newName, email: newEmail };
+            users[userIndex] = { ...users[userIndex], name: newName, power: newPower };
             console.log(users);
             await fs.writeFile(dataPath, JSON.stringify(users, null, 2));
 
-            res.status(200).json({ message: `You sent ${newName} and ${newEmail}` });
+            res.status(200).json({ message: `You sent ${newName} and ${newPower}` });
         }
     } catch (error) {
         console.error('Error updating user:', error);

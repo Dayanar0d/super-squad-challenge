@@ -3,19 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contact Form</title>
+    <title>Super Squad</title>
   </head>
   <body>
-    <h1>Contact Form</h1>
+    <h1>Hero Creation!</h1>
     <form action="/submit-form" method="POST">
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required /><br /><br />
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required /><br /><br />
-      <label for="message">Message:</label><br />
+      <label for="name">Heros Name:</label>
+      <input type="text" id="name" name="name"  required /><br /><br />
+      <!-- <label for="email" pla>Heros creator:</label> -->
+      <!-- <input type="email" id="email" name="email" placeholder="you :D !"required /><br /><br /> -->
+      <label for="power">Powers:</label><br />
       <textarea
-        id="message"
-        name="message"
+        id="power"
+        name="power"
         rows="4"
         cols="50"
         required
@@ -24,23 +24,42 @@
       <input type="submit" value="Submit" />
     </form>
     <h1>User Management</h1>
+    <h2>Update User</h2>
     <form id="updateForm">
       <label for="currentName">Current name:</label>
       <input type="text" id="currentName" required /><br /><br />
-      <label for="currentEmail">Current email:</label>
-      <input type="email" id="currentEmail" required /><br /><br />
+      <!-- <label for="currentEmail">Current email:</label>
+      <input type="email" id="currentEmail" required /><br /><br /> -->
       <label for="newName">New name:</label>
       <input type="text" id="newName" required /><br /><br />
-      <label for="newEmail">New email:</label>
-      <input type="email" id="newEmail" required /><br /><br />
+      <!-- <label for="newEmail">New email:</label>
+      <input type="email" id="newEmail" required /><br /><br /> -->
+      <label for="newPower">New Powers:</label><br />
+      <textarea
+        id="newPower"
+        name="newPower"
+        rows="4"
+        cols="50"
+        required
+      ></textarea
+      >
       <button type="submit">Update User</button>
     </form>
-    <h1>Show Users</h1>
+    <h2>Delete User</h2>
+    <form id="delete-user">
+      <label for="delete-name">Name:</label>
+      <input type="text" id="delete-name" /><br /><br />
+
+      <!-- <label for="delete-email">Email:</label>
+      <input type="text" id="delete-email" /><br /><br /> -->
+      <button type="submit">Delete User</button><br /><br />
+    </form>
+    <h1>Heros</h1>
     <table id="usersTable">
       <thead>
         <tr>
-          <th>User Name</th>
-          <th>User Email</th>
+          <th> Name</th>
+          <th> Power</th>
         </tr>
       </thead>
       <tbody id="userTableBody">
@@ -53,18 +72,20 @@
         .addEventListener("submit", async (e) => {
           e.preventDefault();
           const currentName = document.getElementById("currentName").value;
-          const currentEmail = document.getElementById("currentEmail").value;
+          // const currentEmail = document.getElementById("currentEmail").value;
           const newName = document.getElementById("newName").value;
-          const newEmail = document.getElementById("newEmail").value;
+          // const newEmail = document.getElementById("newEmail").value;
+          const currentPower = document.getElementById("currentPower").value;
+          const newPower = document.getElementById("newPower").value;
           try {
             const response = await fetch(
-              `/update-user/${currentName}/${currentEmail}`,
+              `/update-user/${currentName}/${currentPower}`,
               {
                 method: "PUT",
                 headers: {
                   "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ newName, newEmail }),
+                body: JSON.stringify({ newName, newPower }),
               }
             );
             const data = await response.json();
@@ -75,6 +96,29 @@
             alert("Error updating user: " + error.message);
           }
         });
+
+      document
+        .getElementById("delete-user")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.getElementById("delete-name").value;
+          // const email = document.getElementById("delete-email").value;
+          const power = document.getElementById("delete-power").value;
+          try {
+            const response = await fetch(`/user/${name}/${power}`, {
+              method: "DELETE",
+            });
+            if (!response.ok) {
+              throw new Error("Error with network");
+            }
+            const data = await response.text();
+            // console.log(data);
+            renderUsers();
+          } catch (error) {
+            console.error("something went wrong" + error.message);
+          }
+        });
+
       async function fetchUsers() {
         try {
           const response = await fetch("/users");
@@ -100,7 +144,7 @@
           const users = await fetchUsers();
           if (Array.isArray(users) && users.length > 0) {
             users.forEach((user) => {
-              const row = `<tr><td>${user.name}</td><td>${user.email}</td></tr>`;
+              const row = `<tr><td>${user.name}</td><td>${user.power}</td></tr>`;
               tableBody.innerHTML += row;
             });
           }
